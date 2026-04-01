@@ -1,0 +1,113 @@
+# 🧾 Form Validation – Machine Round Ready
+
+---
+
+## 📁 Structure
+
+```js
+Single component (App.js)
+```
+
+---
+
+## 📌 Basic Form Validation
+
+```js
+import React, { useState } from "react";
+
+function App() {
+  const [form, setForm] = useState({
+    name: "",
+    email: ""
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const validate = () => {
+    let err = {};
+
+    if (!form.name.trim()) {
+      err.name = "Name is required";
+    }
+
+    if (!form.email.trim()) {
+      err.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      err.email = "Invalid email";
+    }
+
+    return err;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const validationErrors = validate();
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length === 0) {
+      console.log("Form Submitted", form);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Form Validation</h2>
+
+      <form onSubmit={handleSubmit}>
+        <input
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Name"
+        />
+        {errors.name && <p>{errors.name}</p>}
+
+        <input
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          placeholder="Email"
+        />
+        {errors.email && <p>{errors.email}</p>}
+
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  );
+}
+
+export default App;
+```
+
+---
+
+## ⚡ Key Points
+
+* Controlled inputs
+* validate() function
+* error object
+* submit pe check
+
+---
+
+## 🧠 Interview Line
+
+> "I used controlled components and a validation function to handle errors before submission."
+
+---
+
+## ⚠️ Common Mistakes
+
+* validate() call na karna
+* errors display na karna
+* regex galat lagana
+
+---
