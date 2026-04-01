@@ -1,0 +1,64 @@
+import React, { useState } from "react";
+
+const data = [
+  { id: 1, name: "Rahul", age: 25 },
+  { id: 2, name: "Amit", age: 30 },
+  { id: 3, name: "Neha", age: 22 },
+];
+
+function Table() {
+  const [search, setSearch] = useState("");
+  const [sortAsc, setSortAsc] = useState(true);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  // Filter
+  const filtered = data.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Sort
+  const sorted = [...filtered].sort((a, b) =>
+    sortAsc ? a.age - b.age : b.age - a.age
+  );
+
+  return (
+    <div>
+      <input
+        placeholder="Search by name"
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      <button onClick={() => setSortAsc(!sortAsc)}>
+        Sort by Age
+      </button>
+
+      <p>Count: {sorted.length}</p>
+
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((item) => (
+            <tr
+              key={item.id}
+              onClick={() => setSelectedRow(item.id)}
+              style={{
+                background:
+                  selectedRow === item.id ? "yellow" : "white",
+              }}
+            >
+              <td>{item.name}</td>
+              <td>{item.age}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default Table;
