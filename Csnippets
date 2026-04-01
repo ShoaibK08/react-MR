@@ -1,21 +1,48 @@
+# 🚀 React Machine Round Quick Reference (2–3 Years)
 
-
-
-# 📌 1. Setup
+## 📌 1. Basic Setup
 
 ```js
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 ```
 
 ---
 
-# 🔥 2. CRUD (Axios)
+# 🔥 2. CRUD Operations (Fetch)
 
-## ✅ GET
+## ✅ GET API
 
 ```js
+const [data, setData] = useState([]);
+const [loading, setLoading] = useState(false);
+
+useEffect(() => {
+  fetchData();
+}, []);
+
 const fetchData = async () => {
+  try {
+    setLoading(true);
+    const res = await fetch("https://jsonplaceholder.typicode.com/users");
+    const result = await res.json();
+    setData(result);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setLoading(false);
+  }
+};
+```
+
+---
+
+# ⚡ 3. Axios API Calls (IMPORTANT)
+
+## ✅ GET (Axios)
+
+```js
+const fetchUsers = async () => {
   try {
     const res = await axios.get("https://jsonplaceholder.typicode.com/users");
     setData(res.data);
@@ -25,38 +52,60 @@ const fetchData = async () => {
 };
 ```
 
-## ✅ POST
+---
+
+## ✅ POST (Axios)
 
 ```js
-const addItem = async (item) => {
-  const res = await axios.post("/api", item);
-  setData(prev => [...prev, res.data]);
-};
-```
-
-## ✅ DELETE
-
-```js
-const deleteItem = async (id) => {
-  await axios.delete(`/api/${id}`);
-  setData(prev => prev.filter(i => i.id !== id));
-};
-```
-
-## ✅ UPDATE
-
-```js
-const updateItem = async (id, updated) => {
-  const res = await axios.put(`/api/${id}`, updated);
-  setData(prev =>
-    prev.map(i => (i.id === id ? res.data : i))
-  );
+const addUser = async (user) => {
+  try {
+    const res = await axios.post("https://jsonplaceholder.typicode.com/users", user);
+    setData(prev => [...prev, res.data]);
+  } catch (err) {
+    console.log(err);
+  }
 };
 ```
 
 ---
 
-# 🧾 3. Table + CRUD (🔥 MOST IMPORTANT)
+## ✅ DELETE (Axios)
+
+```js
+const deleteUser = async (id) => {
+  try {
+    await axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`);
+    setData(prev => prev.filter(item => item.id !== id));
+  } catch (err) {
+    console.log(err);
+  }
+};
+```
+
+---
+
+## ✅ UPDATE (Axios)
+
+```js
+const updateUser = async (id, updatedData) => {
+  try {
+    const res = await axios.put(
+      `https://jsonplaceholder.typicode.com/users/${id}`,
+      updatedData
+    );
+
+    setData(prev =>
+      prev.map(item => (item.id === id ? res.data : item))
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};
+```
+
+---
+
+# 🧾 4. Table + Axios CRUD (Most Asked 🔥)
 
 ```js
 function App() {
@@ -73,28 +122,45 @@ function App() {
   };
 
   const addUser = async () => {
-    const res = await axios.post("/users", { name });
+    const res = await axios.post("https://jsonplaceholder.typicode.com/users", {
+      name
+    });
     setUsers([...users, res.data]);
     setName("");
   };
 
   const deleteUser = async (id) => {
-    await axios.delete(`/users/${id}`);
-    setUsers(users.filter(u => u.id !== id));
+    await axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`);
+    setUsers(users.filter(user => user.id !== id));
   };
 
   return (
     <div>
-      <input value={name} onChange={e => setName(e.target.value)} />
+      <h2>User Table</h2>
+
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Enter name"
+      />
       <button onClick={addUser}>Add</button>
 
       <table border="1">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
         <tbody>
-          {users.map(u => (
-            <tr key={u.id}>
-              <td>{u.name}</td>
+          {users.map(user => (
+            <tr key={user.id}>
+              <td>{user.id}</td>
+              <td>{user.name}</td>
               <td>
-                <button onClick={() => deleteUser(u.id)}>Delete</button>
+                <button onClick={() => deleteUser(user.id)}>Delete</button>
               </td>
             </tr>
           ))}
@@ -107,26 +173,51 @@ function App() {
 
 ---
 
-# 🧠 4. Context API
+# 🧠 5. Context API
 
 ```js
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 const AppContext = createContext();
+
+export const AppProvider = ({ children }) => {
+  const [data, setData] = useState([]);
+
+  return (
+    <AppContext.Provider value={{ data, setData }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
 
 export const useAppContext = () => useContext(AppContext);
 ```
 
 ---
 
-# ⚡ 5. Redux Toolkit
+# ⚡ 6. Redux Toolkit
 
 ```js
-import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
+import userReducer from "./userSlice";
 
-const slice = createSlice({
+export const store = configureStore({
+  reducer: {
+    user: userReducer
+  }
+});
+```
+
+---
+
+```js
+import { createSlice } from "@reduxjs/toolkit";
+
+const userSlice = createSlice({
   name: "user",
-  initialState: { users: [] },
+  initialState: {
+    users: []
+  },
   reducers: {
     setUsers: (state, action) => {
       state.users = action.payload;
@@ -134,40 +225,43 @@ const slice = createSlice({
   }
 });
 
-export const { setUsers } = slice.actions;
-
-const store = configureStore({
-  reducer: { user: slice.reducer }
-});
+export const { setUsers } = userSlice.actions;
+export default userSlice.reducer;
 ```
 
 ---
 
-# 🔍 6. Pagination
+# 🔍 7. Pagination
 
 ```js
-const indexOfLast = page * limit;
-const indexOfFirst = indexOfLast - limit;
-const currentData = data.slice(indexOfFirst, indexOfLast);
+const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 5;
+
+const indexOfLast = currentPage * itemsPerPage;
+const indexOfFirst = indexOfLast - itemsPerPage;
+
+const currentItems = data.slice(indexOfFirst, indexOfLast);
 ```
 
 ---
 
-# 🔎 7. Debounce
+# 🔎 8. Debounce
 
 ```js
-const debounce = (fn, delay) => {
+const debounce = (func, delay) => {
   let timer;
   return (...args) => {
     clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
+    timer = setTimeout(() => {
+      func(...args);
+    }, delay);
   };
 };
 ```
 
 ---
 
-# ⚡ 8. Form Handling
+# ⚡ 9. Form Handling
 
 ```js
 const [form, setForm] = useState({ name: "" });
@@ -179,10 +273,10 @@ const handleChange = (e) => {
 
 ---
 
-# 🧠 9. Hooks
+# 🧠 10. Hooks
 
 ```js
-const memoValue = useMemo(() => fn(data), [data]);
+const memoValue = useMemo(() => expensiveFunction(data), [data]);
 
 const memoFunc = useCallback(() => {
   console.log("Hello");
@@ -191,43 +285,14 @@ const memoFunc = useCallback(() => {
 
 ---
 
-# ⚠️ 10. Important Patterns
-
-## Conditional Rendering
-
-```js
-{loading ? <p>Loading...</p> : <List />}
-```
-
-## List Rendering
-
-```js
-data.map(item => (
-  <div key={item.id}>{item.name}</div>
-))
-```
-
----
-
-# 🚀 11. Interview Strategy
+# 🚀 11. Strategy
 
 * UI → State → API → CRUD → Optimize
-* Always handle loading + error
+* Always show loading + error
 * Keep UI simple
-
----
-
-# 🔥 12. Super Shortcut
-
-👉 Use `Ctrl + F`:
-
-* "post"
-* "delete"
-* "pagination"
-* "table"
 
 ---
 
 # 🏁 Final Line
 
-> Working code > Perfect code 🚀
+> "Working code > Perfect code"
