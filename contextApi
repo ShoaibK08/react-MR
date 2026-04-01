@@ -1,0 +1,99 @@
+# 🧠 Context API – Clean Setup (Minimal & Interview Ready)
+
+---
+
+## 📁 Structure
+
+```js
+src/
+ ├── App.js
+ ├── context.js
+ └── index.js
+```
+
+---
+
+## 📌 context.js (All logic here)
+
+```js
+import { createContext, useContext, useState } from "react";
+
+const AppContext = createContext();
+
+export const AppProvider = ({ children }) => {
+  const [users, setUsers] = useState([]);
+
+  const addUser = (user) => {
+    setUsers(prev => [...prev, user]);
+  };
+
+  const deleteUser = (id) => {
+    setUsers(prev => prev.filter(u => u.id !== id));
+  };
+
+  return (
+    <AppContext.Provider value={{ users, addUser, deleteUser }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+// custom hook
+export const useAppContext = () => useContext(AppContext);
+```
+
+---
+
+## 📌 index.js (ONLY wrap)
+
+```js
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { AppProvider } from "./context";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
+  <AppProvider>
+    <App />
+  </AppProvider>
+);
+```
+
+---
+
+## 📌 App.js (Use context)
+
+```js
+import { useAppContext } from "./context";
+
+function App() {
+  const { users, addUser, deleteUser } = useAppContext();
+
+  return (
+    <div>
+      <h2>Context API</h2>
+
+      <button onClick={() => addUser({ id: Date.now(), name: "Shoaib" })}>
+        Add User
+      </button>
+
+      {users.map(user => (
+        <div key={user.id}>
+          {user.name}
+          <button onClick={() => deleteUser(user.id)}>Delete</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default App;
+```
+
+---
+
+## 🧠 Interview Line
+
+> "I kept logic in a single context file and index.js only wraps the provider for clean separation."
