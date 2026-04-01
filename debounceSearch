@@ -1,0 +1,43 @@
+
+import { useState } from "react";
+import useDebounce from "./useDebounce"
+
+const usersData = [
+  { id: 1, name: "Shoaib" },
+  { id: 2, name: "Rahul" },
+  { id: 3, name: "Aman" },
+  { id: 4, name: "John" }
+];
+
+function App() {
+  const [search, setSearch] = useState("");
+
+  const debouncedSearchTerm = useDebounce(search, 500) 
+
+const filteredUsers = usersData.filter((user)=>(
+  user.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+))
+
+
+  return (
+    <div>
+       <input
+        type="text"
+        placeholder="Search user"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+<ul>
+  {
+    filteredUsers.map((user,index)=>(
+   <li key={user.id} > {user.name}</li>
+
+    ))
+  }
+</ul>
+    </div>
+  )
+}
+
+export default App
