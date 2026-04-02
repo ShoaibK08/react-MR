@@ -1,1 +1,206 @@
 
+
+## 📁 Structure
+
+```js
+src/
+ ├── store.js
+ └── App.js
+```
+
+---
+
+## 📌 store.js (Persist Setup)
+
+```js
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+export const useUserStore = create(
+  persist(
+    (set) => ({
+      users: [],
+
+      addUser: (user) =>
+        set((state) => ({
+          users: [...state.users, user]
+        })),
+
+      deleteUser: (id) =>
+        set((state) => ({
+          users: state.users.filter((u) => u.id !== id)
+        })),
+
+      updateUser: (id, updatedData) =>
+        set((state) => ({
+          users: state.users.map((u) =>
+            u.id === id ? { ...u, ...updatedData } : u
+          )
+        }))
+    }),
+    {
+      name: "user-storage" // key in localStorage
+    }
+  )
+);
+```
+
+---
+
+## 📌 App.js (Same as normal Zustand)
+
+```js
+import React, { useState } from "react";
+import { useUserStore } from "./store";
+
+function App() {
+  const { users, addUser, deleteUser, updateUser } = useUserStore();
+
+  const [form, setForm] = useState({
+    name: "",
+    age: "",
+    gender: ""
+  });
+
+  const [editId, setEditId] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (editId) {
+      updateUser(editId, form);
+      setEditId(null);
+    } else {
+      addUser({ ...form, id: Date.now() });
+    }
+
+    setForm({
+      name: "",
+      age: "",
+      gender: ""
+    });
+  };
+
+  const handleEdit = (user) => {
+    setForm(user);
+    setEditId(user.id);
+  };
+
+  return (
+    <div>
+      <h2>Zustand Persist CRUD</h2>
+
+      <form onSubmit={handleSubmit}>
+        <input
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Name"
+        />
+
+        <input
+          name="age"
+          value={form.age}
+          onChange={handleChange}
+          placeholder="Age"
+        />
+
+        <select
+          name="gender"
+          value={form.gender}
+          onChange={handleChange}
+        >
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+
+        <button type="submit">
+          {editId ? "Update" : "Add"}
+        </button>
+      </form>
+
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td>{user.name}</td>
+              <td>{user.age}</td>
+              <td>{user.gender}</td>
+              <td>
+                <button onClick={() => handleEdit(user)}>Edit</button>
+                <button onClick={() => deleteUser(user.id)}>
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default App;
+```
+
+---
+
+## ⚡ What Persist Does
+
+* Data localStorage me save hota hai
+* Page refresh ke baad bhi data rehta hai
+
+---
+
+## 🧠 Interview Lines
+
+👉
+
+* “Persist middleware automatically syncs state with localStorage”
+* “Improves UX by keeping data after refresh”
+
+---
+
+## ⚠️ Common Mistakes
+
+* persist import bhool jana
+* name key na dena
+* large data store kar dena
+
+---
+
+## 🚀 Bonus (Agar aur impress karna ho)
+
+```js
+{
+  name: "user-storage",
+  partialize: (state) => ({ users: state.users })
+}
+```
+
+👉 sirf required data store karega
+
+---
+
+# 🏁 Final Line
+
+> "Zustand persist helps maintain state even after reload with minimal setup."
